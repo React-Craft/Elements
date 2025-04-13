@@ -1,6 +1,6 @@
-import { createElement } from "./createElement.js";
-import { ComponentButton1 } from "./componentButton.js";
-import { resolveTree } from "./resolveTree.js";
+import { createElement } from "./utils/createElement.js";
+import { ComponentButton1 } from "./components/componentButton.js";
+import { resolveTree } from "./utils/resolveTree.js";
 
 const element = createElement(
   "div",

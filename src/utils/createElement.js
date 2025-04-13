@@ -1,4 +1,4 @@
-import { ReactElement } from "./ReactElement.js";
+import { ReactElement } from "./reactElement.js";
 
 const RESERVED_PROPS = { key: true, ref: true };
 
