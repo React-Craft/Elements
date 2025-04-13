@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>createElement</title>
+    <title>Elements</title>
   </head>
   <body>
     <script>
@@ -50,7 +50,7 @@
       }
 
       function ComponentButton1(props) {
-        return createElement("button", { color: "red" }, props.children);
+        return createElement(ComponentButton2, { color: "blue" }, "no");
       }
 
       function ComponentButton2(props) {
@@ -61,13 +61,13 @@
         "div",
         { id: "delete-account", key: "1" },
         createElement("p", null, "Elements"),
-        createElement(ComponentButton1, null, "yes"),
-        createElement(ComponentButton2, { color: "blue" }, "no")
+        createElement(ComponentButton1, null, "yes")
+        // createElement(ComponentButton2, { color: "blue" }, "no")
       );
 
-      function resolveElementTreeVerbose(element) {
+      function resolveTree(element, result) {
         if (Array.isArray(element)) {
-          return element.map(resolveElementTreeVerbose);
+          return element.map((child) => resolveTree(child, result));
         }
 
         if (typeof element !== "object" || element === null) {
@@ -75,17 +75,17 @@
         }
 
         if (typeof element.type === "function") {
-          // React 컴포넌트인 경우
-          return {
-            component: element.type.name || "Anonymous",
-            rendered: resolveElementTreeVerbose(element.type(element.props)),
+          const componentName = element.type.name || "Anonymous";
+          const rendered = element.type(element.props);
+          const resolvedRendered = resolveTree(rendered, result);
+          result[componentName] = {
+            type: rendered.type,
+            props: rendered.props,
           };
+          return { type: componentName };
         }
 
-        // DOM element인 경우
-        const resolvedChildren = resolveElementTreeVerbose(
-          element.props.children
-        );
+        const resolvedChildren = resolveTree(element.props.children, result);
         return {
           type: element.type,
           props: {
@@ -95,8 +95,11 @@
         };
       }
 
-      const resolvedTree = resolveElementTreeVerbose(element);
-      console.log(JSON.stringify(resolvedTree, null, 2));
+      const result = {};
+      const rootTree = resolveTree(element, result);
+      const finalOutput = Object.assign({}, rootTree, result);
+
+      console.log(JSON.stringify(finalOutput, null, 2));
     </script>
   </body>
 </html>
