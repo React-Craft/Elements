@@ -65,7 +65,38 @@
         createElement(ComponentButton2, { color: "blue" }, "no")
       );
 
-      console.log(element);
+      function resolveElementTreeVerbose(element) {
+        if (Array.isArray(element)) {
+          return element.map(resolveElementTreeVerbose);
+        }
+
+        if (typeof element !== "object" || element === null) {
+          return element;
+        }
+
+        if (typeof element.type === "function") {
+          // React 컴포넌트인 경우
+          return {
+            component: element.type.name || "Anonymous",
+            rendered: resolveElementTreeVerbose(element.type(element.props)),
+          };
+        }
+
+        // DOM element인 경우
+        const resolvedChildren = resolveElementTreeVerbose(
+          element.props.children
+        );
+        return {
+          type: element.type,
+          props: {
+            ...element.props,
+            children: resolvedChildren,
+          },
+        };
+      }
+
+      const resolvedTree = resolveElementTreeVerbose(element);
+      console.log(JSON.stringify(resolvedTree, null, 2));
     </script>
   </body>
 </html>
