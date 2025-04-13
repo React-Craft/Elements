@@ -50,7 +50,12 @@
       }
 
       function ComponentButton1(props) {
-        return createElement(ComponentButton2, { color: "blue" }, "no");
+        return createElement(
+          "button",
+          { color: "blue" },
+          createElement("p", null, "hello"),
+          createElement(ComponentButton2, { color: "blue" }, "no")
+        );
       }
 
       function ComponentButton2(props) {
@@ -59,10 +64,9 @@
 
       const element = createElement(
         "div",
-        { id: "delete-account", key: "1" },
+        { id: "delete-account" },
         createElement("p", null, "Elements"),
-        createElement(ComponentButton1, null, "yes")
-        // createElement(ComponentButton2, { color: "blue" }, "no")
+        createElement(ComponentButton1)
       );
 
       function resolveTree(element, result) {
@@ -78,10 +82,7 @@
           const componentName = element.type.name || "Anonymous";
           const rendered = element.type(element.props);
           const resolvedRendered = resolveTree(rendered, result);
-          result[componentName] = {
-            type: rendered.type,
-            props: rendered.props,
-          };
+          result[componentName] = resolvedRendered;
           return { type: componentName };
         }
 
@@ -96,8 +97,11 @@
       }
 
       const result = {};
-      const rootTree = resolveTree(element, result);
-      const finalOutput = Object.assign({}, rootTree, result);
+      const domTree = resolveTree(element, result);
+      const finalOutput = {
+        ...domTree,
+        ...result,
+      };
 
       console.log(JSON.stringify(finalOutput, null, 2));
     </script>
