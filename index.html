@@ -2,52 +2,70 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Element</title>
+    <title>createElement</title>
   </head>
   <body>
-    <div id="root">
-      <div id="delete-account">
-        <p>Elements</p>
-        <component-button1>yes</component-button1>
-        <component-button2 color="blue">no</component-button2>
-      </div>
-    </div>
-
     <script>
-      function elementToObject(element) {
-        const type = element.tagName.toLowerCase();
+      const RESERVED_PROPS = { key: true, ref: true };
 
-        const props = {};
+      function ReactElement(type, key, ref, props) {
+        return {
+          type,
+          key,
+          ref,
+          props,
+        };
+      }
 
-        for (let attr of element.attributes) {
-          props[attr.name] = attr.value;
-        }
+      function createElement(type, config, ...children) {
+        let props = {};
+        let key = null,
+          ref = null;
 
-        const children = [];
-        for (let node of element.childNodes) {
-          if (node.nodeType === Node.TEXT_NODE) {
-            const text = node.textContent.trim();
-            if (text) children.push(text);
-          } else if (node.nodeType === Node.ELEMENT_NODE) {
-            children.push(elementToObject(node));
+        if (config != null) {
+          if (config.key !== undefined) key = "" + config.key;
+          if (config.ref !== undefined) ref = config.ref;
+
+          for (let prop in config) {
+            if (!RESERVED_PROPS.hasOwnProperty(prop)) {
+              props[prop] = config[prop];
+            }
           }
         }
 
-        if (children.length > 0) {
-          props.children = children.length === 1 ? children[0] : children;
+        if (children.length === 1) {
+          props.children = children[0];
+        } else if (children.length > 1) {
+          props.children = children;
         }
 
-        return { type, props };
+        if (type && type.defaultProps) {
+          for (let prop in type.defaultProps) {
+            if (props[prop] === undefined)
+              props[prop] = type.defaultProps[prop];
+          }
+        }
+
+        return ReactElement(type, key, ref, props);
       }
 
-      window.addEventListener("DOMContentLoaded", () => {
-        const rootElement = document.getElementById("delete-account");
-        const resultObject = elementToObject(rootElement);
-        // console.log(resultObject);
+      function ComponentButton1(props) {
+        return createElement("button", { color: "red" }, props.children);
+      }
 
-        // 최종결과d;la
-        console.log(JSON.stringify(resultObject, null, 2));
-      });
+      function ComponentButton2(props) {
+        return createElement("button", { color: props.color }, props.children);
+      }
+
+      const element = createElement(
+        "div",
+        { id: "delete-account", key: "1" },
+        createElement("p", null, "Elements"),
+        createElement(ComponentButton1, null, "yes"),
+        createElement(ComponentButton2, { color: "blue" }, "no")
+      );
+
+      console.log(element);
     </script>
   </body>
 </html>
